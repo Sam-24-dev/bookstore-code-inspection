@@ -56,10 +56,14 @@ def update_stock(id, stock):
     conn = get_connection()
     try:
         cur = conn.cursor()
-        cur.execute(f"UPDATE books SET stock = {stock} WHERE id = {id}")
+        cur.execute("UPDATE books SET stock = ? WHERE id = ?", (stock, id))
         conn.commit()
-    finally:
         return True
+    except sqlite3.Error as e:
+        print(f"Error actualizando el stock: {e}")
+        return False
+    finally:
+        conn.close()  
 
 
 def save_order(order_id, username, total, status):
