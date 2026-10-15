@@ -43,6 +43,16 @@ def _apply_coupon(total, coupon, token):
     return total
 
 
+def _next_order_id():
+    """Read the next order ID without depending on a shared default list."""
+    conn = database.get_connection()
+    try:
+        row = conn.execute("SELECT MAX(id) FROM orders").fetchone()
+        return (row[0] or 0) + 1
+    finally:
+        conn.close()
+
+
 def process_order(token, items, coupon=None, shipping="standard", log=None):
     """Process an order and record its total."""
     if log is None:
@@ -63,7 +73,7 @@ def process_order(token, items, coupon=None, shipping="standard", log=None):
         total += 3
     total += total * TAX
 
-    order_id = len(log) + 1
+    order_id = _next_order_id()
     database.save_order(order_id, username, total, "PENDING")
     log.append(order_id)
     return round(total, 2)
