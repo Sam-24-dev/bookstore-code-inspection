@@ -111,6 +111,8 @@ def print_quote(username, items):
 
 
 def cancel_order(order_id):
+    """Cancel an order, reporting database errors and closing the connection."""
+    conn = None
     try:
         conn = database.get_connection()
         conn.execute(
@@ -120,3 +122,6 @@ def cancel_order(order_id):
         conn.commit()
     except sqlite3.Error as error:
         print(f"Could not cancel order: {error}")
+    finally:
+        if conn is not None:
+            conn.close()
